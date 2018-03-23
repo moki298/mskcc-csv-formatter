@@ -1,7 +1,7 @@
 A Python Script to be used by Lab Technologists at MSKCC
 =======================
 
-A Utility script written in Python intended for use by Lab Technologists at Memorial Sloan Kettering Hospital.
+A Utility script written in Python intended for use by Lab Technologists at Memorial Sloan Kettering Cancer Center.
 The software helps in validating a CSV against a predefined format and outputs a formatted file if any errors exist.
 
 A SampleSheet file is a plain text, CSV, meta-data file, that represents samples to be sequenced through an Illumina sequencer.  This file is a required input file for sample data generation. 
