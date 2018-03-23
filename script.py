@@ -23,7 +23,7 @@ def columnOrderChecker(args):
         else:
             print "Columns order perfect"
 
-    with open(inputFile, 'r') as infile, open('formatted.csv', 'a') as outfile:
+    with open(inputFile, 'r') as infile, open('modified.csv', 'a') as outfile:
         writer = csv.DictWriter(
             outfile, extrasaction='ignore', fieldnames=defaultHeader)
         writer.writeheader()
@@ -80,18 +80,18 @@ def missingSamplesAppender(inputFile, incompleteSamples):
         writer = csv.writer(inFile)
         print "Apending missing samples..."
         writer.writerows(missingRows)
-        print "Formatted file created"
+        print "Modified file created"
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='Formats the CSV file as required')
-    parser.add_argument("-f", help="Input file to be formatted",
+    parser.add_argument("-f", help="Input file to be validated",
                         dest="input", type=str, required=True)
     parser.set_defaults(func=columnOrderChecker)
     args = parser.parse_args()
     args.func(args)
-    missingSamplesFinder('formatted.csv')
+    missingSamplesFinder('modified.csv')
 
 
 if __name__ == '__main__':
