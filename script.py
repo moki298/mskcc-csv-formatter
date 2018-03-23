@@ -9,12 +9,16 @@ import argparse
 columns = defaultdict(list)
 defaultHeader = ['FCID', 'Lane', 'SampleID', 'SampleRef', 'Index',
                  'Description', 'Control', 'Recipe', 'Operator', 'SampleProject']
+columnsDiffer = False
 
 
 def columnOrderChecker(args):
-    inputFile = args.input
-    columnsDiffer = False
+    """Checks if the columns order differ."""
 
+    inputFile = args.input
+    global columnsDiffer
+
+    # check if the column order differs from the defaultheaders (default columns)
     with open(inputFile, 'r') as infile:
         reader = csv.DictReader(infile)
         if defaultHeader != reader.fieldnames:
@@ -23,6 +27,11 @@ def columnOrderChecker(args):
         else:
             print "Columns order perfect"
 
+    # delete  modified.csv if already exists
+    if os.path.isfile('modified.csv'):
+        os.remove('modified.csv')
+
+    # creates  new modified.csv file and modifies it's columns if required
     with open(inputFile, 'r') as infile, open('modified.csv', 'a') as outfile:
         writer = csv.DictWriter(
             outfile, extrasaction='ignore', fieldnames=defaultHeader)
@@ -35,6 +44,11 @@ def columnOrderChecker(args):
 
 
 def missingSamplesFinder(inputFile):
+    """Prepares a list of all samples that are missing."""
+
+    global columnsDiffer
+
+    # prepares a dictionary with each column name as 'key' and it's values in an array as 'value'
     with open(inputFile, 'r') as infile:
         reader = csv.DictReader(infile)
         for row in reader:
@@ -46,6 +60,7 @@ def missingSamplesFinder(inputFile):
     incompleteSamples = []
     incr = 0
 
+    # makes a list of all the incomplete samples, a sample is considered incomplete if it's sampleID occurs only once in the file
     for sampleID in sampleOccurenceCount:
         if sampleOccurenceCount[sampleID] == 1:
             incompleteSamples.append(sampleID)
@@ -56,9 +71,16 @@ def missingSamplesFinder(inputFile):
         missingSamplesAppender(inputFile, incompleteSamples)
     else:
         print "No incomplete samples found"
+        if columnsDiffer == False:
+            print "The file is free of errors, no modifications required"
+            os.remove('modified.csv')
+        else:
+            print "Modified file created with correct column order"
 
 
 def missingSamplesAppender(inputFile, incompleteSamples):
+    """Appends the missing samples to the end of CSV file."""
+
     missingRows = []
 
     for sampleID in incompleteSamples:
@@ -78,15 +100,16 @@ def missingSamplesAppender(inputFile, incompleteSamples):
 
     with inFile:
         writer = csv.writer(inFile)
-        print "Apending missing samples..."
+        print "Apending missing samples"
         writer.writerows(missingRows)
+        print "Missing samples added"
         print "Modified file created"
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Formats the CSV file as required')
-    parser.add_argument("-f", help="Input file to be validated",
+        description='Checks the samplesheet CSV file for errors and modifies it as required')
+    parser.add_argument("-f", help="Input file to be modified",
                         dest="input", type=str, required=True)
     parser.set_defaults(func=columnOrderChecker)
     args = parser.parse_args()
